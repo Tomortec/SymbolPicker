@@ -80,6 +80,7 @@ public struct SymbolPicker: View {
 
     @Binding public var symbol: String
     @State private var searchText = ""
+    let closable: Bool
     @Environment(\.presentationMode) private var presentationMode
 
     // MARK: - Public Init
@@ -87,7 +88,8 @@ public struct SymbolPicker: View {
     /// Initializes `SymbolPicker` with a string binding that captures the raw value of
     /// user-selected SFSymbol.
     /// - Parameter symbol: String binding to store user selection.
-    public init(symbol: Binding<String>) {
+    public init(closable: Bool = true, symbol: Binding<String>) {
+        self.closable = closable
         _symbol = symbol
     }
 
@@ -161,7 +163,9 @@ public struct SymbolPicker: View {
                 ForEach(Self.symbols.filter { searchText.isEmpty ? true : $0.localizedCaseInsensitiveContains(searchText) }, id: \.self) { thisSymbol in
                     Button {
                         symbol = thisSymbol
-                        presentationMode.wrappedValue.dismiss()
+                        if closable {
+                            presentationMode.wrappedValue.dismiss()
+                        }
                     } label: {
                         if thisSymbol == symbol {
                             Image(systemName: thisSymbol)
@@ -207,9 +211,11 @@ public struct SymbolPicker: View {
             #if !os(tvOS)
             /// tvOS can use back button on remote
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(LocalizedString("cancel")) {
-                        presentationMode.wrappedValue.dismiss()
+                if closable {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button(LocalizedString("cancel")) {
+                            presentationMode.wrappedValue.dismiss()
+                        }
                     }
                 }
             }
